@@ -1,7 +1,7 @@
 from numpy import *
-import numpy as np
 
-def kernel_icd(X, kernel, m = None, precision = 1e-6):
+
+def kernel_icd(X, kernel, m=None, precision=1e-6):
     """Approximates a kernel matrix using incomplete Cholesky decomposition (ICD).
 
     Input:	- X: data matrix in row format (each data point is a row)
@@ -29,47 +29,46 @@ def kernel_icd(X, kernel, m = None, precision = 1e-6):
     if m is None:
         m = n
 
-    perm = arange(n)  #permutation vector
-    d = zeros((1, n))  #diagonal of the residual kernel matrix
+    perm = arange(n)  # permutation vector
+    d = zeros((1, n))  # diagonal of the residual kernel matrix
     G = zeros((n, m))
     subset = zeros((1, m))
 
     for i in range(m):
-        x = X[perm[i : n+1], :]
-        if i == 0:  #diagonal of kernel matrix
-            d[:, i : n+1] = kernel(x, x).T
-        else:  #update the diagonal of the residual kernel matrix
-            d[:, i : n+1] = kernel(x, x).squeeze() - np.sum(G[i : n+1, : i]**2, 1).T
+        x = X[perm[i: n + 1], :]
+        if i == 0:  # diagonal of kernel matrix
+            d[:, i: n + 1] = kernel(x, x).T
+        else:  # update the diagonal of the residual kernel matrix
+            d[:, i: n + 1] = kernel(x, x).squeeze() - np.sum(G[i: n + 1, : i] ** 2, 1).T
 
-        dtrace = np.sum(d[:, i:n+1])
+        dtrace = np.sum(d[:, i:n + 1])
 
         if dtrace <= 0:
-            print "Warning: negative diagonal entry: ", diag
+            print("Warning: negative diagonal entry: ", diag)
 
         if dtrace <= precision:
-            G = G[:,  :i] 
-            subset = subset[ :i]
+            G = G[:, :i]
+            subset = subset[:i]
             break
 
-        m2 = np.max(d[:,i : n+1])  #find the new best element
-        j = np.argmax(d[:, i : n+1])
-        #j = j + i - 1  #take into account the offset i
-        j = j + i   #take into account the offset i
+        m2 = np.max(d[:, i: n + 1])  # find the new best element
+        j = np.argmax(d[:, i: n + 1])
+        # j = j + i - 1  #take into account the offset i
+        j = j + i  # take into account the offset i
         m1 = sqrt(m2)
         subset[0, i] = j
 
-        perm[ [i, j] ] = perm[ [j, i] ] #permute elements i and j
-        #permute rows i and j
+        perm[[i, j]] = perm[[j, i]]  # permute elements i and j
+        # permute rows i and j
         G[[i, j], :i] = G[[j, i], :i]
-        G[i, i] = m1  #new diagonal element
+        G[i, i] = m1  # new diagonal element
 
-        #Calculate the i-th column. May 
-        #introduce a slight numerical error compared to explicit calculation.
+        # Calculate the i-th column. May
+        # introduce a slight numerical error compared to explicit calculation.
 
-        G[i+1 : n +1, i] = (kernel(X[perm[i], :], X[perm[i+1:n+1], :]).T -
-                            dot(G[i+1:n+1, :i], G[i, :i].T) )/ m1
+        G[i + 1: n + 1, i] = (kernel(X[perm[i], :], X[perm[i + 1:n + 1], :]).T -
+                              dot(G[i + 1:n + 1, :i], G[i, :i].T)) / m1
 
     ind = argsort(perm)
     G = G[ind, :]
     return G
-
