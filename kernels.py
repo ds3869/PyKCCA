@@ -100,3 +100,7 @@ class PolyKernel(object):
 class LinearKernel(PolyKernel):
     def __init__(self):
         super(LinearKernel, self).__init__(0, 1)
+
+
+if __name__ == '__main__':
+    pass

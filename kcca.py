@@ -18,7 +18,7 @@ class KCCA(object):
                  max_variance_ratio=1.0):
 
         if decomp not in ('full', 'icd'):
-            raise ValueError("Error: valid decom values are full or icd, received: " + str(decomp))
+            raise ValueError("Error: valid decomp values are full or icd, received: " + str(decomp))
 
         self.kernel1 = kernel1
         self.kernel2 = kernel2
@@ -32,7 +32,7 @@ class KCCA(object):
         self.alpha2 = None
         self.trainX1 = None
         self.trainX2 = None
-        self.max_variance_rato = max_variance_ratio
+        self.max_variance_ratio = max_variance_ratio
 
         if scaler1 is not None:
             if hasattr(scaler1, "transform"):  # sklearn scaler
@@ -50,7 +50,6 @@ class KCCA(object):
         else:
             self.scaler2 = None
 
-    @staticmethod
     def full_standard_hardoon_method(self, k1, k2, reg):
 
         n = k1.shape[0]
@@ -67,7 +66,6 @@ class KCCA(object):
 
         return (r, d)
 
-    @staticmethod
     def full_simplified_hardoon_method(self, K1, K2, reg):
 
         N = K1.shape[0]
@@ -84,7 +82,6 @@ class KCCA(object):
 
         return (R, D)
 
-    @staticmethod
     def full_kettering_method(self, K1, K2, reg):
 
         N = K1.shape[0]
@@ -155,12 +152,12 @@ class KCCA(object):
         betas = betas[::-1]
 
         # finding the components
-        if self.max_variance_rato < 1.0:
+        if self.max_variance_ratio < 1.0:
             n_samples = len(betas)
             explained_variance = (betas ** 2) / n_samples
             explained_variance_ratio = explained_variance / explained_variance.sum()
             ratio_cumsum = explained_variance_ratio.cumsum()
-            n_components = numpy.sum(ratio_cumsum < self.max_variance_rato) + 1
+            n_components = numpy.sum(ratio_cumsum < self.max_variance_ratio) + 1
         else:
             # using all the dimensions
             n_components = len(betas)
@@ -183,7 +180,6 @@ class KCCA(object):
 
         return (y1, y2, betas[0])
 
-    @staticmethod
     def icd_simplified_hardoon_method(self, G1, G2, reg):
         N1 = G1.shape[1]
         N2 = G2.shape[1]
@@ -374,11 +370,11 @@ class UnscaledKCCA(KCCA):
 
         # fiding the components
         n_samples = len(betas)
-        if self.max_variance_rato < 1.0:
+        if self.max_variance_ratio < 1.0:
             explained_variance = (betas ** 2) / n_samples
             explained_variance_ratio = explained_variance / explained_variance.sum()
             ratio_cumsum = explained_variance_ratio.cumsum()
-            n_components = numpy.sum(ratio_cumsum < self.max_variance_rato) + 1
+            n_components = numpy.sum(ratio_cumsum < self.max_variance_ratio) + 1
         else:
             # using all the dimensions
             n_components = n_samples
@@ -465,12 +461,10 @@ class UnscaledKCCA(KCCA):
 if __name__ == "__main__":
     x1 = numpy.random.rand(100, 20)
     x2 = numpy.random.rand(100, 30)
+
     kernel = LinearKernel()
-    cca = KCCA(kernel, kernel,
-               regularization=1e-5,
-               decomp='full',
-               method='kettering_method',
-               scaler1=lambda x: x,
+
+    cca = KCCA(kernel, kernel, regularization=1e-5, decomp='full', method='kettering_method', scaler1=lambda x: x,
                scaler2=lambda x: x).fit(x1, x2)
 
     print("Done ", cca.beta_)
@@ -479,6 +473,8 @@ if __name__ == "__main__":
     orig_y2 = cca.y2_
 
     print("Trying to test")
+
     y1, y2 = cca.transform(x1, x2)
+
     print(numpy.allclose(y1, orig_y1))
     print(numpy.allclose(y2, orig_y2))

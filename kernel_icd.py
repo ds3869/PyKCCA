@@ -2,7 +2,8 @@ from numpy import *
 
 
 def kernel_icd(X, kernel, m=None, precision=1e-6):
-    """Approximates a kernel matrix using incomplete Cholesky decomposition (ICD).
+    """
+    Approximates a kernel matrix using incomplete Cholesky decomposition (ICD).
 
     Input:	- X: data matrix in row format (each data point is a row)
                 - kernel: the kernel function. It should calculate on the diagonal!
@@ -72,3 +73,7 @@ def kernel_icd(X, kernel, m=None, precision=1e-6):
     ind = argsort(perm)
     G = G[ind, :]
     return G
+
+
+if __name__ == '__main__':
+    pass
